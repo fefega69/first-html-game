@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advance Wars Clone Prototype</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <style>
+        body { margin: 0; display: flex; justify-content: center; align-items: center; background-color: #222; height: 100vh; }
+        canvas { border: 4px solid #444; }
+    </style>
+</head>
+<body>
+    <script>
+        const TILE_SIZE = 16;
+        const MAP_WIDTH = 15;
+        const MAP_HEIGHT = 10;
+        
+        const TERRAIN_TYPE = {
+            WATER: 0,
+            REEF: 1,
+            BEACHDOWN: 5,
+            BEACHUPRIGHT: 6,
+            BEACHUPLEFT: 7,
+            BEACHDOWNLEFT: 8,
+            BEACHDOWNRIGHT: 10,
+            GRASS: 105,
+            MOUNTAIN: 106,
+            FOREST: 107,
+            ROADDOWNRIGHT: 120,
+            ROADLEFTDOWN: 121,
+            ROADLEFTDOWNRIGHT: 122,
+            ROADLEFTRIGHT: 123,
+            ROADLEFTUP: 124,
+            ROADLEFTDOWNUP: 125,
+            ROADLEFTRIGHTUP: 126,
+            ROADUPDOWN: 127,
+            ROADDOWNRIGHTUP: 128,
+            ROADRIGHTUP: 129,
+            BRIDGEUPDOWN: 130,
+            BRIDGELEFTRIGHT: 131 
+        };
+
+        const LOGICAL_TERRAIN = {
+            
+            [TERRAIN_TYPE.GRASS]: 'grass',
+            [TERRAIN_TYPE.FOREST]: 'forest',
+            [TERRAIN_TYPE.MOUNTAIN]: 'mountain',
+            [TERRAIN_TYPE.WATER]: 'water',
+            [TERRAIN_TYPE.REEF]: 'reef',
+            
+            // Beaches
+            [TERRAIN_TYPE.BEACHDOWN]: 'beach',
+            [TERRAIN_TYPE.BEACHUPRIGHT]: 'beach',
+            [TERRAIN_TYPE.BEACHUPLEFT]: 'beach',
+            [TERRAIN_TYPE.BEACHDOWNLEFT]: 'beach',
+            [TERRAIN_TYPE.BEACHDOWNRIGHT]: 'beach',
+            
+            // Roads and Bridges
+            [TERRAIN_TYPE.ROADDOWNRIGHT]: 'road', 
+            [TERRAIN_TYPE.ROADLEFTDOWN]: 'road',
+            [TERRAIN_TYPE.ROADLEFTDOWNRIGHT]: 'road', 
+            [TERRAIN_TYPE.ROADLEFTRIGHT]: 'road', 
+            [TERRAIN_TYPE.ROADLEFTUP]: 'road', 
+            [TERRAIN_TYPE.ROADLEFTDOWNUP]: 'road', 
+            [TERRAIN_TYPE.ROADLEFTRIGHTUP]: 'road', 
+            [TERRAIN_TYPE.ROADUPDOWN]: 'road', 
+            [TERRAIN_TYPE.ROADDOWNRIGHTUP]: 'road', 
+            [TERRAIN_TYPE.ROADRIGHTUP]: 'road', 
+            [TERRAIN_TYPE.BRIDGEUPDOWN]: 'road', 
+            [TERRAIN_TYPE.BRIDGELEFTRIGHT]: 'road'
+        };
+
+        const MOVE_COSTS = {
+            'foot':{
+                'grass': 1,
+                'forest': 1,
+                'mountain': 2,
+                'water': 99,
+                'reef': 99,
+                'beach': 99,
+                'road': 1
+            },
+            'boot':{
+                'grass': 1,
+                'forest': 1,
+                'mountain': 1,
+                'water': 99,
+                'reef': 99,
+                'beach': 99,
+                'road': 1
+            },
+            'wheels':{
+                'grass': 2,
+                'forest': 3,
+                'mountain': 99,
+                'water': 99,
+                'reef': 99,
+                'beach': 99,
+                'road': 1
+            },
+            'treads':{
+                'grass': 1,
+                'forest': 2,
+                'mountain': 99,
+                'water': 99,
+                'reef': 99,
+                'beach': 99,
+                'road': 1
+            },
+            'lander':{
+                'grass': 99,
+                'forest': 99,
+                'mountain': 99,
+                'water': 1,
+                'reef': 2,
+                'beach': 1,
+                'road': 99
+            },
+            'sea':{
+                'grass': 99,
+                'forest': 99,
+                'mountain': 99,
+                'water': 1,
+                'reef': 2,
+                'beach': 99,
+                'road': 99
+            },
+            'air':{
+                'grass': 1,
+                'forest': 1,
+                'mountain': 1,
+                'water': 1,
+                'reef': 1,
+                'beach': 1,
+                'road': 1
+            }
+        };
+
+        class Unit {
+            // Replaced 'color' with 'animKey'
+            constructor(scene, gridX, gridY, animKey, moveRange, movementType, team) {
+                this.scene = scene;
+                this.gridX = gridX;
+                this.gridY = gridY;
+                this.team = team;
+                this.moveRange = moveRange;
+                this.movementType = movementType;
+                this.animKey = animKey;
+                this.hp = 10; 
+                this.hasMoved = false;
+                this.isDead = false;    
+
+                
+                // We use add.sprite instead of add.rectangle
+                this.sprite = scene.add.sprite(0, 0, 'units');
+                this.sprite.setDepth(2); 
+                this.sprite.play(animKey);
+
+                // 2. Create the HP Text
+                // We set the depth to 3 so it's ALWAYS on top of the sprite (depth 2)
+                this.hpText = scene.add.text(0, 0, '10', { 
+                    fontSize: '10px', 
+                    fontWeight: 'bold',
+                    fill: '#ffffff', 
+                    stroke: '#000000', 
+                    strokeThickness: 2 
+                });
+                this.hpText.setDepth(3); 
+
+                // 3. Initial positioning
+                this.syncVisuals();
+            }
+
+            syncVisuals() {
+                const screenX = this.gridX * TILE_SIZE + TILE_SIZE / 2;
+                const screenY = this.gridY * TILE_SIZE + TILE_SIZE / 2;
+
+                this.sprite.setPosition(screenX, screenY);
+
+                // Position the HP text at the bottom-right of the tile
+                this.hpText.setPosition(screenX + 2, screenY + 2);
+                this.hpText.setText(Math.ceil(this.hp));
+                
+                // Hide HP text if full health (optional, like Advance Wars)
+                this.hpText.setVisible(this.hp < 10);
+            }
+
+            // Update the text position when moving
+            updateVisuals() {
+                this.sprite.setPosition(this.gridX * TILE_SIZE + 8, this.gridY * TILE_SIZE + 8);
+                this.hpText.setPosition(this.gridX * TILE_SIZE, this.gridY * TILE_SIZE + 8);
+                this.hpText.setText(Math.ceil(this.hp));
+                if (this.hp <= 0) this.die();
+            }
+
+            die() {
+                this.isDead = true;
+                this.sprite.destroy();
+                this.hpText.destroy();
+            }
+
+            moveTo(x, y) {
+                this.gridX = x;
+                this.gridY = y;
+                this.hasMoved = true;
+                this.sprite.setTint(0x777777);
+                this.sprite.stop(); // Stop animation when done
+                this.syncVisuals(); // Update the text position
+            }
+
+            takeDamage(amount) {
+                this.hp -= amount;
+                
+                if (this.hp <= 0) {
+                    this.hp = 0;
+                    this.die();
+                    return; // <--- THIS IS THE MAGIC WORD. It stops the function right here!
+                }
+                
+                // Only update visuals if the unit is still alive
+                this.syncVisuals();
+            }
+
+            finishAction() {
+                this.hasMoved = true;
+                this.sprite.setTint(0x777777); // Turn gray
+                this.sprite.stop();             // Stop marching
+                this.syncVisuals();            // Snap to grid and update HP
+            }
+        }
+
+        class MainScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'MainScene' });
+            }
+
+            highlightTargets() {
+                if (!this.targetGraphics) this.targetGraphics = this.add.graphics().setDepth(1);
+                this.targetGraphics.clear();
+                this.targetGraphics.lineStyle(2, 0xff0000); // Red outline
+
+                this.currentTargets.forEach(enemy => {
+                    this.targetGraphics.strokeRect(enemy.gridX * TILE_SIZE, enemy.gridY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                });
+            }
+
+            executeAttack(attacker, defender) {
+                console.log("Combat Start!");
+                
+                // 1. Attacker deals damage
+                defender.takeDamage(5); 
+
+                // 2. ONLY counter-attack if the defender is still alive
+                if (!defender.isDead) {
+                    attacker.takeDamage(2);
+                } else {
+                    console.log("Target destroyed! No counter-attack.");
+                }
+            }
+
+            finishTurn() {
+                // 1. Hide the UI
+                if (this.actionMenu) this.actionMenu.setVisible(false);
+                
+                // 2. Clear all temporary graphics
+                if (this.highlightGraphics) this.highlightGraphics.clear();
+                if (this.targetGraphics) this.targetGraphics.clear();
+                
+                // 3. Reset logic variables
+                this.selectedUnit = null;
+                this.currentRangeTiles = null;
+                this.currentTargets = null;
+                
+                // 4. THE MOST IMPORTANT PART: Return to IDLE
+                this.gameState = 'IDLE';
+                
+                console.log("Turn finished. Game state is now IDLE.");
+            }
+
+            update() {
+                this.highlightGraphics.clear();
+
+                // If nothing is selected, clear the screen and stop immediately
+                if (!this.currentRangeTiles) {
+                    this.highlightGraphics.clear();
+                    return; 
+                }
+                
+                if (this.currentRangeTiles) {
+                    // Use the pulsing alpha from our tween
+                    // Inside update(), before filling the rectangles
+                    this.highlightGraphics.setBlendMode(Phaser.BlendModes.ADD); 
+                    this.highlightGraphics.fillStyle(0x0055ff, this.highlightAlpha);
+                    this.highlightGraphics.fillStyle(0x33ccff, this.highlightAlpha); 
+                    this.highlightGraphics.lineStyle(2, 0xffffff, this.highlightAlpha + 0.2);
+
+                    this.currentRangeTiles.forEach(tile => {
+                        const px = tile.x * TILE_SIZE;
+                        const py = tile.y * TILE_SIZE;
+                        
+                        // Draw the fill
+                        this.highlightGraphics.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                        
+                        // Draw a slight border for each tile to make it look like a grid
+                        this.highlightGraphics.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+                    });
+                }
+            }
+
+            preload() {
+                // Terrain tile spritesheet
+                this.load.image('terrain_tiles', 'assets/spritesheet.png');
+
+                // Unit spritesheet
+                this.load.spritesheet('units', 'assets/unit-sprites.png', { 
+                    frameWidth: 16, 
+                    frameHeight: 16 
+                });
+            }
+
+            create() {
+                this.gameState = 'IDLE';
+                this.units = [];
+                this.cursorX = 0;
+                this.cursorY = 0;
+                this.selectedUnit = null;
+                this.highlightGraphics = this.add.graphics();
+                //this.cameras.main.setZoom(2);
+                this.cameras.main.centerOn(
+                    (MAP_WIDTH * TILE_SIZE) / 2, 
+                    (MAP_HEIGHT * TILE_SIZE) / 2
+                );
+
+                this.anims.create({
+                    key: 'red_infantry_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 0, end: 2 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_infantry_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 3, end: 5 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_mech_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 6, end: 8 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_mech_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 9, end: 11 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_recon_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 12, end: 14 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_recon_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 15, end: 17 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_tank_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 18, end: 20 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_tank_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 21, end: 23 }),
+                    frameRate: 5,
+                    repeat: -1,
+                    yoyo: true
+                });
+                this.anims.create({
+                    key: 'red_heavy_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 24, end: 26 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_heavy_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 27, end: 29 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_apc_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 30, end: 32 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_apc_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 33, end: 35 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_aa_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 36, end: 38 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_aa_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 39, end: 41 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });this.anims.create({
+                    key: 'red_arty_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 42, end: 44 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_arty_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 45, end: 47 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_rocket_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 48, end: 50 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_rocket_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 51, end: 53 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_missile_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 54, end: 56 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_missile_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 57, end: 59 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_fighter_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 60, end: 62 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_fighter_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 63, end: 65 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_bomber_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 66, end: 68 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_bomber_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 69, end: 71 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_helicopter_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 72, end: 74 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: false    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_helicopter_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 75, end: 77 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: false    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_transport_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 78, end: 80 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: false    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_transport_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 81, end: 83 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: false    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_bb_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 84, end: 86 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_bb_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 87, end: 89 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_ca_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 90, end: 92 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_ca_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 93, end: 95 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_lander_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 96, end: 98 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_lander_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 99, end: 101 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'red_sub_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 102, end: 104 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+                this.anims.create({
+                    key: 'blue_sub_idle',
+                    frames: this.anims.generateFrameNumbers('units', { start: 105, end: 107 }),
+                    frameRate: 5, // 4 frames per second
+                    repeat: -1,   // -1 means loop forever
+                    yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+                });
+
+                // Inside create()
+                this.highlightAlpha = 0.3; // Default starting alpha
+                this.tweens.add({
+                    targets: this,
+                    highlightAlpha: 0.1, // Pulsing down to 0.1
+                    duration: 800,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+
+                // 2. DEFINE YOUR MAP DATA
+                // In a real game, you'd export this from a level editor like Tiled.
+                // The numbers correspond to the tile's position in your terrain.png (0 is the first tile, 1 is the second, etc.)
+                this.mapData = [
+                    [105, 105, 105, 107, 107, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105],
+                    [105, 105, 105, 107, 107, 105, 105, 105, 106, 106, 105, 105, 105, 105, 105],
+                    [0, 0, 105, 107, 107, 107, 105, 105, 106, 105, 105, 105, 105, 105, 105],
+                    [0, 0, 105, 105, 107, 107, 105, 105, 105, 105, 105, 105, 105, 105, 105],
+                    [105, 105, 105, 105, 105, 107, 107, 105, 105, 105, 105, 105, 105, 105, 105],
+                    [105, 105, 105, 105, 105, 105, 107, 107, 107, 107, 105, 105, 105, 105, 105],
+                    [105, 105, 105, 105, 105, 105, 105, 105, 105, 107, 107, 105, 105, 105, 105],
+                    [105, 105, 106, 106, 105, 105, 105, 105, 105, 105, 107, 107, 0, 0, 0],
+                    [105, 105, 106, 105, 105, 105, 105, 105, 105, 105, 105, 107, 107, 105, 105],
+                    [120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 107, 107, 105]
+                ];
+
+                // 3. GENERATE THE TILEMAP
+                const map = this.make.tilemap({ 
+                    data: this.mapData, 
+                    tileWidth: TILE_SIZE, 
+                    tileHeight: TILE_SIZE 
+                });
+
+                // The first argument is any name you want, the second must match the key from preload()
+                const tileset = map.addTilesetImage('my_terrain', 'terrain_tiles'); 
+                
+                // Render the layer to the screen
+                const layer = map.createLayer(0, tileset, 0, 0);
+                layer.setDepth(0); // The Floor
+
+
+                this.highlightGraphics = this.add.graphics();
+                this.highlightGraphics.setDepth(1);
+
+                // --- The rest of the setup remains the same ---
+
+                // Spawn dummy units
+                this.units.push(new Unit(this, 1, 2, 'red_bb_idle', 5, 'sea', 'red')); 
+                this.units.push(new Unit(this, 2, 2, 'red_infantry_idle', 3, 'foot', 'red')); 
+                this.units.push(new Unit(this, 2, 3, 'red_mech_idle', 2, 'foot', 'red')); 
+                this.units.push(new Unit(this, 2, 4, 'red_recon_idle', 8, 'wheels', 'red')); 
+                this.units.push(new Unit(this, 2, 5, 'red_tank_idle', 6, 'treads', 'red')); 
+                this.units.push(new Unit(this, 2, 6, 'red_helicopter_idle', 6, 'air', 'red')); 
+                this.units.push(new Unit(this, 5, 5, 'blue_infantry_idle', 3, 'foot', 'blue')); 
+                this.units.push(new Unit(this, 6, 6, 'blue_infantry_idle', 3, 'foot', 'blue')); 
+                this.units.push(new Unit(this, 12, 7, 'blue_bb_idle', 5, 'sea', 'blue')); 
+                this.units.push(new Unit(this, 13, 2, 'blue_infantry_idle', 3, 'foot', 'blue')); 
+
+                this.actionMenu = this.add.container(0, 0).setVisible(false);
+                this.actionMenu.setDepth(10); // Keep it above the units and highlights!
+
+                // Create the cursor
+                
+                this.cursor = this.add.rectangle(
+                    TILE_SIZE / 2, TILE_SIZE / 2, 
+                    TILE_SIZE, TILE_SIZE
+                );
+                this.cursor.setStrokeStyle(4, 0xffff00); 
+                this.cursor.setDepth(3);
+
+                // Setup Inputs
+                this.cursors = this.input.keyboard.createCursorKeys();
+                // Inside create()
+                this.zKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+                this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+
+                // Update your listener to handle these specific keys
+                this.input.keyboard.on('keydown', (event) => {
+                    if (event.code === 'KeyZ') this.handleSelect();
+                    if (event.code === 'KeyX') this.handleCancel();
+                });
+
+                this.input.keyboard.on('keydown', this.handleInput, this);
+            }
+
+            showActionMenu(x, y, options) {
+                this.actionMenu.removeAll(true);
+                this.menuOptions = options;
+                this.menuIndex = 0;
+
+                const menuWidth = 70;
+                const menuHeight = options.length * 20 + 10;
+                const mapPixelWidth = MAP_WIDTH * TILE_SIZE;
+                const mapPixelHeight = MAP_HEIGHT * TILE_SIZE;
+
+                // 1. Calculate the "Default" position (Right side of the unit)
+                let finalX = (x + 1) * TILE_SIZE;
+                let finalY = y * TILE_SIZE;
+
+                // 2. HORIZONTAL CHECK: If the menu goes off the right edge, flip it to the left
+                if (finalX + menuWidth > mapPixelWidth) {
+                    finalX = (x * TILE_SIZE) - menuWidth;
+                }
+
+                // 3. VERTICAL CHECK: If the menu goes off the bottom edge, push it up
+                if (finalY + menuHeight > mapPixelHeight) {
+                    finalY = mapPixelHeight - menuHeight - 5; // 5px safety padding
+                }
+
+                // Draw Background
+                const bg = this.add.rectangle(0, 0, menuWidth, menuHeight, 0x222222, 0.9).setOrigin(0, 0);
+                bg.setStrokeStyle(2, 0xffffff);
+                this.actionMenu.add(bg);
+
+                // Add Text
+                options.forEach((opt, i) => {
+                    const txt = this.add.text(20, 10 + (i * 20), opt, { fontSize: '14px', fill: '#fff' });
+                    this.actionMenu.add(txt);
+                });
+
+                // Add Pointer
+                this.menuPointer = this.add.rectangle(10, 18, 6, 6, 0xff3333);
+                this.actionMenu.add(this.menuPointer);
+
+                // Apply the calculated safe position
+                this.actionMenu.setPosition(finalX, finalY);
+                this.actionMenu.setVisible(true);
+                this.gameState = 'MENU';
+            }
+
+            drawGrid() {
+                const graphics = this.add.graphics();
+                graphics.lineStyle(1, 0x000000, 0.2);
+                graphics.fillStyle(0x44aa44, 1); // Grass color
+
+                for (let x = 0; x < MAP_WIDTH; x++) {
+                    for (let y = 0; y < MAP_HEIGHT; y++) {
+                        graphics.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        graphics.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    }
+                }
+            }
+
+            handleInput(event) {
+                if (this.gameState === 'IDLE' || this.gameState === 'MOVING' || this.gameState === 'TARGETING') {
+                    // Normal Map Movement
+                    if (event.code === 'ArrowUp' && this.cursorY > 0) this.cursorY--;
+                    else if (event.code === 'ArrowDown' && this.cursorY < MAP_HEIGHT - 1) this.cursorY++;
+                    else if (event.code === 'ArrowLeft' && this.cursorX > 0) this.cursorX--;
+                    else if (event.code === 'ArrowRight' && this.cursorX < MAP_WIDTH - 1) this.cursorX++;
+
+                    this.cursor.setPosition(
+                        this.cursorX * TILE_SIZE + TILE_SIZE / 2, 
+                        this.cursorY * TILE_SIZE + TILE_SIZE / 2
+                    );
+                }
+                else if (this.gameState === 'MENU') {
+                    // Menu Navigation (Up/Down)
+                    if (event.code === 'ArrowUp') {
+                        this.menuIndex = Math.max(0, this.menuIndex - 1);
+                    } else if (event.code === 'ArrowDown') {
+                        this.menuIndex = Math.min(this.menuOptions.length - 1, this.menuIndex + 1);
+                    }
+                    
+                    // Move the little red pointer (14 is the base Y, +15 for each option if we had more)
+                    this.menuPointer.y = 14 + (this.menuIndex * 15); 
+                }
+            }
+            handleSelect() {
+                if (this.gameState === 'IDLE') {
+                    // 1. Pick up a unit
+                    const unitAtCursor = this.getUnitAt(this.cursorX, this.cursorY);
+                    if (unitAtCursor && !unitAtCursor.hasMoved) {
+                        this.selectedUnit = unitAtCursor;
+                        this.originalX = this.selectedUnit.gridX; // Remember where we started!
+                        this.originalY = this.selectedUnit.gridY;
+                        
+                        // Inside handleSelect, when picking up a unit:
+                        this.currentRangeTiles = this.getReachableTiles(
+                            this.selectedUnit.gridX, 
+                            this.selectedUnit.gridY, 
+                            this.selectedUnit.moveRange,
+                            this.selectedUnit.team
+                        );
+                        this.gameState = 'MOVING';
+                    }
+                } 
+                else if (this.gameState === 'MOVING') {
+                    const isReachable = this.currentRangeTiles.some(t => t.x === this.cursorX && t.y === this.cursorY);
+                    const isStayingPut = (this.cursorX === this.selectedUnit.gridX && this.cursorY === this.selectedUnit.gridY);
+                    const unitAtCursor = this.getUnitAt(this.cursorX, this.cursorY);
+
+                    if ((isReachable && !unitAtCursor) || isStayingPut) {
+                        this.selectedUnit.gridX = this.cursorX;
+                        this.selectedUnit.gridY = this.cursorY;
+                        this.selectedUnit.syncVisuals();
+
+                        if (this.highlightGraphics) {
+                            this.highlightGraphics.clear();
+                        }
+                        
+                        // --- ADD THIS LINE ---
+                        // This removes the "map" the game uses to draw the blue tiles
+                        this.currentRangeTiles = null; 
+
+                        const enemies = this.getAdjacentEnemies(this.selectedUnit.gridX, this.selectedUnit.gridY, this.selectedUnit.team);
+                        let options = ['Wait'];
+                        if (enemies.length > 0) options.unshift('Attack');
+
+                        this.showActionMenu(this.selectedUnit.gridX, this.selectedUnit.gridY, options);
+                    }
+                }
+                else if (this.gameState === 'MENU') {
+                    const choice = this.menuOptions[this.menuIndex];
+
+                    if (choice === 'Wait') {
+                        this.selectedUnit.finishAction(); 
+                        // Close everything and go back to map roaming
+                        this.finishTurn();
+                    } 
+                    // Inside handleSelect when 'Attack' is chosen:
+                    else if (choice === 'Attack') {
+                        this.currentTargets = this.getAdjacentEnemies(this.selectedUnit.gridX, this.selectedUnit.gridY, this.selectedUnit.team);
+                        this.actionMenu.setVisible(false);
+                        this.highlightTargets();
+                        
+                        // SNAP cursor to the first available target so the player doesn't have to hunt for it
+                        if (this.currentTargets.length > 0) {
+                            this.cursorX = this.currentTargets[0].gridX;
+                            this.cursorY = this.currentTargets[0].gridY;
+                            this.cursor.setPosition(
+                                this.cursorX * TILE_SIZE + TILE_SIZE / 2, 
+                                this.cursorY * TILE_SIZE + TILE_SIZE / 2
+                            );
+                        }
+
+                        this.gameState = 'TARGETING';
+                    }
+                }
+                else if (this.gameState === 'TARGETING') {
+                    const targetUnit = this.getUnitAt(this.cursorX, this.cursorY);
+                    
+                    // Check if we actually clicked a valid enemy from our list
+                    if (targetUnit && this.currentTargets.includes(targetUnit)) {
+                        
+                        // 1. Run the combat
+                        this.executeAttack(this.selectedUnit, targetUnit);
+                        
+                        // 2. Clean up the units array (remove anyone who died)
+                        this.units = this.units.filter(u => !u.isDead);
+
+                        // 3. IMPORTANT: Finalize the attacker's turn
+                        // If the attacker survived the counter-attack, mark them as done
+                        if (!this.selectedUnit.isDead) {
+                            this.selectedUnit.finishAction();
+                        }
+
+                        // 4. Reset the game state to IDLE
+                        this.finishTurn();
+                    }
+                }
+            }
+            // Simple helper to reset
+            closeMenu() {
+                this.actionMenu.setVisible(false);
+                this.selectedUnit = null;
+                this.currentRangeTiles = null;
+                this.gameState = 'IDLE';
+            }
+
+            handleCancel() {
+                // Case 1: You are currently looking at a unit's movement range
+                if (this.gameState === 'MOVING') {
+                    this.finishTurn();
+                } 
+                // Case 2: The Action Menu (Wait) is open
+                else if (this.gameState === 'MENU' || this.gameState === 'TARGETING') {
+                    // Only snap back if the unit hasn't officially "Wait"-ed or "Attack"-ed yet
+                    if (this.selectedUnit && !this.selectedUnit.hasMoved) {
+                        this.selectedUnit.gridX = this.originalX;
+                        this.selectedUnit.gridY = this.originalY;
+                        this.selectedUnit.syncVisuals();
+                    }
+                    
+                    this.finishTurn();
+                }
+            }
+
+            clearSelection() {
+                this.selectedUnit = null;
+                this.currentRangeTiles = null;
+                this.highlightGraphics.clear();
+                this.gameState = 'IDLE';
+            }
+
+            getUnitAt(x, y) {
+                return this.units.find(u => u.gridX === x && u.gridY === y && !u.isDead);
+            }
+
+            // The core "Strategy" logic
+            getReachableTiles(startX, startY, maxMovePoints, unitTeam) {
+                let reachable = [];
+                let queue = [{ x: startX, y: startY, cost: 0 }];
+                let visited = new Map(); 
+
+                while (queue.length > 0) {
+                    queue.sort((a, b) => a.cost - b.cost);
+                    let current = queue.shift();
+                    let key = `${current.x},${current.y}`;
+
+                    if (visited.has(key) && visited.get(key) <= current.cost) continue;
+                    visited.set(key, current.cost);
+
+                    if (current.cost > 0 && current.cost <= maxMovePoints) {
+                        if (!reachable.some(t => t.x === current.x && t.y === current.y)) {
+                            reachable.push({ x: current.x, y: current.y });
+                        }
+                    }
+
+                    const neighbors = [
+                        { x: current.x, y: current.y - 1 }, { x: current.x, y: current.y + 1 },
+                        { x: current.x - 1, y: current.y }, { x: current.x + 1, y: current.y }
+                    ];
+
+                    neighbors.forEach(n => {
+                        if (n.x >= 0 && n.x < MAP_WIDTH && n.y >= 0 && n.y < MAP_HEIGHT) {
+                            
+                            // 1. GET TERRAIN COST
+                            let rawTerrainID = this.mapData[n.y][n.x];
+                            let logicalTerrain = LOGICAL_TERRAIN[rawTerrainID] || 'grass';
+                            let stepCost = MOVE_COSTS[this.selectedUnit.movementType][logicalTerrain] || 99;
+                            
+                            // 2. CHECK FOR ENEMY OBSTACLES
+                            // Use your existing getUnitAt helper to see if anyone is there
+                            let unitOnTile = this.getUnitAt(n.x, n.y);
+                            
+                            // If there's a unit AND it's not on our team, it's a wall (cost 99)
+                            if (unitOnTile && unitOnTile.team !== unitTeam) {
+                                stepCost = 99; 
+                            }
+                            
+                            let totalCost = current.cost + stepCost;
+
+                            if (totalCost <= maxMovePoints) {
+                                queue.push({ x: n.x, y: n.y, cost: totalCost });
+                            }
+                        }
+                    });
+                }
+                return reachable;
+            }
+
+            getAdjacentEnemies(x, y, playerTeam) {
+                const directions = [
+                    { x: 0, y: -1 }, { x: 0, y: 1 }, 
+                    { x: -1, y: 0 }, { x: 1, y: 0 }
+                ];
+
+                return this.units.filter(unit => {
+                    const isAdjacent = directions.some(d => 
+                        unit.gridX === x + d.x && unit.gridY === y + d.y
+                    );
+                    return isAdjacent && unit.team !== playerTeam && !unit.isDead;
+                });
+            }
+        }
+
+        const config = {
+            type: Phaser.AUTO,
+            width: MAP_WIDTH * TILE_SIZE,
+            height: MAP_HEIGHT * TILE_SIZE,
+            
+            // Turn off pixel perfect scaling to smooth the edges
+            pixelArt: false, 
+            antialias: true, 
+            
+            scale: {
+                mode: Phaser.Scale.NONE,
+                autoCenter: Phaser.Scale.NO_CENTER,
+                zoom: 2
+            },
+            scene: MainScene
+        };
+
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
