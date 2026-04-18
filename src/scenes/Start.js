@@ -1109,10 +1109,8 @@ export class Start extends Phaser.Scene {
         const map = this.make.tilemap({ key: 'map' });
 
         const tileset = map.addTilesetImage('spritesheet', 'terrain_tiles');
-        const structuretileset = map.addTilesetImage('spritesheet1', 'structure_tiles');
 
         this.terrainLayer = map.createLayer('Terrain', tileset, 0, 0);
-        this.structureLayer = map.createLayer('Structures', structuretileset, 0, 0);
 
         this.mapData = [];
         // Find the starting ID of your tileset (usually 1)
@@ -1122,7 +1120,6 @@ export class Start extends Phaser.Scene {
             let row = [];
             for (let x = 0; x < map.width; x++) {
                 const terrainTile = map.getTileAt(x, y, true, 'Terrain');
-                const structTile = map.getTileAt(x, y, true, 'Structures');
 
                 // 1. Start with a default
                 let finalType = 'grass';
@@ -1132,14 +1129,6 @@ export class Start extends Phaser.Scene {
                     // Convert Phaser Index back to Tiled ID
                     const tiledId = terrainTile.index - firstGid; 
                     finalType = LOGICAL_TERRAIN[tiledId] || 'grass';
-                }
-
-                // 3. Check the Structures Layer (Overwrites terrain)
-                if (structTile && structTile.index !== -1) {
-                    // Note: Use structuretileset.firstgid here if it's a different tileset!
-                    const structFirstGid = structuretileset.firstgid;
-                    const structId = structTile.index - structFirstGid;
-                    finalType = LOGICAL_TERRAIN[structId] || finalType;
                 }
 
                 // 4. Push ONLY ONCE per tile
@@ -1152,7 +1141,6 @@ export class Start extends Phaser.Scene {
         console.log("Map Data Sample (First Row):", this.mapData[0]);
         console.table(this.mapData);
         this.terrainLayer.setDepth(0);
-        this.structureLayer.setDepth(1);
 
         const unitObjects = map.getObjectLayer('Units').objects;
 
