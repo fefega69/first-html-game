@@ -614,22 +614,22 @@ export class Start extends Phaser.Scene {
     }
 
     spawnUnit(unitType, x, y, team, isFactoryBuilt = false) {
-    const stats = UNIT_CATALOG[unitType];
-    if (!stats) return null;
+        const stats = UNIT_CATALOG[unitType];
+        if (!stats) return null;
 
-    const newUnit = new Unit(this, x, y, {
-        ...stats,
-        texture: `${team}_${stats.textureBase || unitType + '_idle'}`,
-        team: team
-    });
+        const newUnit = new Unit(this, x, y, {
+            ...stats,
+            texture: `${team}_${stats.textureBase || unitType + '_idle'}`,
+            team: team
+        });
 
-    // CRITICAL: Ensure map-spawned units are ready to go
-    newUnit.hasMoved = false;
-    if (newUnit.sprite) newUnit.sprite.clearTint(); 
+        // CRITICAL: Ensure map-spawned units are ready to go
+        newUnit.hasMoved = false;
+        if (newUnit.sprite) newUnit.sprite.clearTint(); 
 
-    this.units.push(newUnit);
-    return newUnit;
-}
+        this.units.push(newUnit);
+        return newUnit;
+    }
 
     updateDamagePreview() {
         // If we aren't targeting or the unit is gone, hide the text and get out
@@ -642,9 +642,10 @@ export class Start extends Phaser.Scene {
 
         // Only show if the cursor is actually on one of the enemies we can hit
         if (target && this.currentTargets && this.currentTargets.includes(target)) {
-            const projectedHP = this.calculateDamage(this.selectedUnit, target);
+            const damage = this.calculateDamage(this.selectedUnit, target);
+            const remainingHP = Math.max(0, target.hp - damage);
             
-            this.damagePreviewText.setText(`Target HP: ${target.hp} -> ${projectedHP}`);
+            this.damagePreviewText.setText(`Target HP: ${target.hp} -> ${remainingHP}`);
             this.damagePreviewText.setPosition(
                 this.cursorX * TILE_SIZE + TILE_SIZE / 2, 
                 this.cursorY * TILE_SIZE - 5
@@ -1210,7 +1211,7 @@ export class Start extends Phaser.Scene {
         this.turnBanner.add([bannerBg, this.turnText]);
         this.turnBanner.setVisible(false);
         this.currentTurn = 'red';
-        this.gameState = 'IDLE'; // Ensure this is set at the very end of create()
+        this.gameState = 'IDLE';
     }
 
     showActionMenu(x, y, options) {
@@ -1218,7 +1219,7 @@ export class Start extends Phaser.Scene {
         this.menuOptions = options;
         this.menuIndex = 0;
 
-        const menuWidth = 70;
+        const menuWidth = 90;
         const menuHeight = options.length * 20 + 10;
         const mapPixelWidth = MAP_WIDTH * TILE_SIZE;
         const mapPixelHeight = MAP_HEIGHT * TILE_SIZE;
