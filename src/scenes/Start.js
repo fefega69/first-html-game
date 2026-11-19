@@ -2,196 +2,291 @@ export const TILE_SIZE = 16;
 export const MAP_WIDTH = 30;
 export const MAP_HEIGHT = 20;
 
+const ARROW_FRAMES = {
+    //arrow heads
+    ARROWUP: 3,
+    ARROWRIGHT: 4,
+    ARROWLEFT: 8,
+    ARROWDOWN: 9,
+
+    //corners
+    DOWN_RIGHT: 0,
+    DOWN_LEFT: 2,
+    UP_RIGHT: 10,
+    UP_LEFT: 11,
+
+    //straight
+    VERTICAL: 1,
+    HORIZONTAL: 5,
+    
+    //ends
+    DOWN: 6,
+    UP: 7,
+    RIGHT: 12,
+    LEFT: 13
+};
+
 const UNIT_CATALOG = {
     'infantry': {
+        unitName: 'INFANTRY',
         textureBase: 'infantry_idle',
-        moveRange: 3,
+        textureBattle: 'infantry_battle',
+        moveRange: '3',
         movementType: 'foot',
-        attackType: 'mgun',
+        attackType: ['mgun'],
         armorType: 'infantry',
-        minRange: 1,
+        minRange: 1, 
         maxRange: 1,
-        cost: 1000
+        cost: 1000,
+        strongVs:['Infantry'],
+        weakVs:['Every Vehicle']
     },
 
     'mech': {
+        unitName: 'MECH',
         textureBase: 'mech_idle',
+        textureBattle: 'mech_battle',
         moveRange: 2,
         movementType: 'boot',
-        attackType: 'bazooka',
+        attackType: ['bazooka','mgun'],
         armorType: 'infantry',
         minRange: 1,
         maxRange: 1,
-        cost: 3000
+        cost: 3000,
+        strongVs:['Infantry', 'Vehicles'],
+        weakVs:['Heavy Tank', 'Air Units']
     },
 
     'recon': {
+        unitName: 'RECON',
         textureBase: 'recon_idle',
+        textureBattle: 'recon_battle',
         moveRange: 8,
         movementType: 'wheels',
-        attackType: 'mgun',
+        attackType: ['mgun'],
         armorType: 'light',
         minRange: 1,
         maxRange: 1,
-        cost: 4000
+        cost: 4000,
+        strongVs:['Infantry'],
+        weakVs:['Every Vehicle']
     },
 
     't-copter': {
+        unitName: 'T-COPTER',
         textureBase: 'transport_idle',
+        textureBattle: 't-copter_battle',
         moveRange: 6,
         movementType: 'air',
         armorType: 'copter',
-        cost: 5000
+        cost: 5000,
+        strongVs:['No Weapons'],
+        weakVs:['Anti-Air', 'Fighters']
     },
 
     'apc': {
+        unitName: 'APC',
         textureBase: 'apc_idle',
+        textureBattle: 'apc_battle',
         moveRange: 6,
         movementType: 'treads',
         armorType: 'light',
-        cost: 5000
+        cost: 5000,
+        strongVs:['No weapons'],
+        weakVs:['Vehicles']
     },
 
     'artillery': {
+        unitName: 'ARTILLERY',
         textureBase: 'arty_idle',
+        textureBattle: 'artillery_battle',
         moveRange: 5,
         movementType: 'treads',
-        attackType: 'artillery',
+        attackType: ['artillery'],
         armorType: 'light',
         minRange: 2,
         maxRange: 3,
-        cost: 6000
+        cost: 6000,
+        strongVs:['Ground Units'],
+        weakVs:['Air Units', 'Ground Units']
     },
 
     'tank': {
+        unitName: 'TANK',
         textureBase: 'tank_idle',
+        textureBattle: 'tank_battle',
         moveRange: 6,
         movementType: 'treads',
-        attackType: 'cannon',
+        attackType: ['cannon', 'mgun'],
         armorType: 'tank',
         minRange: 1,
         maxRange: 1,
-        cost: 7000
+        cost: 7000,
+        strongVs:['Vehicles', 'Infantry'],
+        weakVs:['Ships', 'Air Units']
     },
 
     'anti-air': {
+        unitName: 'ANTI-AIR',
         textureBase: 'aa_idle',
+        textureBattle: 'aa_battle',
         moveRange: 6,
         movementType: 'treads',
-        attackType: 'vulcan',
+        attackType: ['vulcan'],
         armorType: 'tank',
         minRange: 1,
         maxRange: 1,
-        cost: 8000
+        cost: 8000,
+        strongVs:['Infantry', 'Air Units'],
+        weakVs:['Tanks']
     },
 
     'b-copter': {
+        unitName: 'B-COPTER',
         textureBase: 'helicopter_idle',
+        textureBattle: 'helicopter_battle',
         moveRange: 6,
         movementType: 'air',
-        attackType: 'agm',
+        attackType: ['agm', 'coptergun'],
         armorType: 'copter',
         minRange: 1,
         maxRange: 1,
-        cost: 9000
+        cost: 9000,
+        strongVs:['Vehicles', 'Ships', 'Infantry', 'Copters'],
+        weakVs:['Anti-Air']
     },
 
     'missile': {
+        unitName: 'MISSILE',
         textureBase: 'missile_idle',
+        textureBattle: 'missile_battle',
         moveRange: 4,
         movementType: 'wheels',
-        attackType: 'aam',
+        attackType: ['aam'],
         armorType: 'light',
         minRange: 3,
         maxRange: 5,
-        cost: 12000
+        cost: 12000,
+        strongVs:['Air Units'],
+        weakVs:['Ground Units']
     },
 
     'lander': {
+        unitName: 'LANDER',
         textureBase: 'lander_idle',
+        textureBattle: 'lander_battle',
         moveRange: 6,
         movementType: 'lander',
         armorType: 'ship',
-        cost: 12000
+        cost: 12000,
+        strongVs:['No Weapon'],
+        weakVs:['Ships', 'Air Units']
     },
     
     'rocket': {
+        unitName: 'ROCKET',
         textureBase: 'rocket_idle',
+        textureBattle: 'rocket_battle',
         moveRange: 5,
         movementType: 'wheels',
-        attackType: 'rockets',
+        attackType: ['rockets'],
         armorType: 'infantry',
         minRange: 3,
         maxRange: 5,
-        cost: 15000
+        cost: 15000,
+        strongVs:['Ground Units', 'Ships'],
+        weakVs:['Air Units', 'Ground Units']
     },
 
     'hvy_tank': {
+        unitName: 'HEAVY TANK',
         textureBase: 'heavy_idle',
+        textureBattle: 'heavy_battle',
         moveRange: 5,
         movementType: 'treads',
-        attackType: 'hvycannon',
+        attackType: ['hvycannon', 'mgun'],
         armorType: 'heavy',
         minRange: 1,
         maxRange: 1,
-        cost: 16000
+        cost: 16000,
+        strongVs:['Vehicles', 'Infantry'],
+        weakVs:['Ships', 'Air Units']
     },
 
     'cruiser': {
+        unitName: 'CRUISER',
         textureBase: 'ca_idle',
+        textureBattle: 'ca_battle',
         moveRange: 6,
         movementType: 'sea',
-        attackType: 'antisub',
+        attackType: ['antisub', 'ciws'],
         armorType: 'ship',
         minRange: 1,
         maxRange: 1,
-        cost: 18000
+        cost: 18000,
+        strongVs:['Submarines', 'Air Units'],
+        weakVs:['Battleships', 'Rockets']
     },
 
     'sub': {
+        unitName: 'SUBMARINE',
         textureBase: 'sub_idle',
+        textureBattle: 'sub_battle',
         moveRange: 5,
         movementType: 'sea',
-        attackType: 'torps',
+        attackType: ['torps'],
         armorType: 'sub',
         minRange: 1,
         maxRange: 1,
-        cost: 20000
+        cost: 20000,
+        strongVs:['Ships'],
+        weakVs:['Cruiser']
     },
 
     'fighter': {
+        unitName: 'FIGHTER',
         textureBase: 'fighter_idle',
+        textureBattle: 'fighter_battle',
         moveRange: 9,
         movementType: 'air',
-        attackType: 'aam',
+        attackType: ['aam'],
         armorType: 'plane',
         minRange: 1,
         maxRange: 1,
-        cost: 20000
+        cost: 20000,
+        strongVs:['Air Units'],
+        weakVs:['Anti-Air']
     },
 
     'bomber': {
+        unitName: 'BOMBER',
         textureBase: 'bomber_idle',
+        textureBattle: 'bomber_battle',
         moveRange: 7,
         movementType: 'air',
-        attackType: 'bomb',
+        attackType: ['bomb'],
         armorType: 'plane',
         minRange: 1,
         maxRange: 1,
-        cost: 22000
+        cost: 22000,
+        strongVs:['Ground Units', 'Ships'],
+        weakVs:['Anti-Air']
     },
 
     'battleship': {
+        unitName: 'BATTLESHIP',
         textureBase: 'bb_idle',
+        textureBattle: 'bb_battle',
         moveRange: 5,
         movementType: 'sea',
-        attackType: 'bb',
+        attackType: ['bb'],
         armorType: 'ship',
         minRange: 3,
         maxRange: 5,
-        cost: 28000
+        cost: 28000,
+        strongVs:['Ground Units', 'Ships'],
+        weakVs:['Submarine', 'Rockets', 'Air Units']
     }
-    // Add more here...
 };
 
 const TERRAIN_TYPE = {
@@ -211,12 +306,20 @@ const TERRAIN_TYPE = {
     RIVERLEFTDOWN: 49,
     RIVERLEFTUP: 50,
     CLIFFDOWN: 62,
+    CLIFFBENDUPPERRIGHT: 63,
+    CLIFFBENDUPPERLEFT: 64,
     CLIFFLEFT: 65,
     CLIFFRIGHT: 66,
+    CLIFFBENDBOTTOMLEFT: 67,
+    CLIFFBENDBOTTOMRIGHT: 68,
     CLIFFCORNERLEFT:69,
     CLIFFCORNERRIGHT: 70,
+    CLIFFEDGELEFT: 76,
+    CLIFFCANALHORI: 77,
+    CLIFFEDGERIGHT: 78,
     WATERFALLUP: 87,
     WATERFALLRIGHT: 88,
+    PIPEUP: 93,
     GRASS: 105,
     MOUNTAIN: 106,
     FOREST: 107,
@@ -240,7 +343,8 @@ const TERRAIN_TYPE = {
 };
 
 const LOGICAL_TERRAIN = {
-    
+    [TERRAIN_TYPE.PIPEUP]: 'pipe',
+
     [TERRAIN_TYPE.GRASS]: 'grass',
     [TERRAIN_TYPE.FOREST]: 'forest',
     [TERRAIN_TYPE.MOUNTAIN]: 'mountain',
@@ -256,6 +360,13 @@ const LOGICAL_TERRAIN = {
     [TERRAIN_TYPE.CLIFFDOWN]: 'water',
     [TERRAIN_TYPE.CLIFFLEFT]: 'water',
     [TERRAIN_TYPE.CLIFFRIGHT]: 'water',
+    [TERRAIN_TYPE.CLIFFBENDBOTTOMLEFT]: 'water',
+    [TERRAIN_TYPE.CLIFFBENDBOTTOMRIGHT]: 'water',
+    [TERRAIN_TYPE.CLIFFBENDUPPERLEFT]: 'water',
+    [TERRAIN_TYPE.CLIFFBENDUPPERRIGHT]: 'water',
+    [TERRAIN_TYPE.CLIFFEDGELEFT]: 'water',
+    [TERRAIN_TYPE.CLIFFEDGERIGHT]: 'water',
+    [TERRAIN_TYPE.CLIFFCANALHORI]: 'water',
 
 
     [TERRAIN_TYPE.REEF]: 'reef',
@@ -301,7 +412,8 @@ const MOVE_COSTS = {
         'reef': 99,
         'beach': 99,
         'road': 1,
-        'river': 2
+        'river': 2,
+        'pipe': 99
     },
     'boot':{
         'grass': 1,
@@ -311,7 +423,8 @@ const MOVE_COSTS = {
         'reef': 99,
         'beach': 99,
         'road': 1,
-        'river': 1
+        'river': 1,
+        'pipe': 99
     },
     'wheels':{
         'grass': 2,
@@ -321,7 +434,8 @@ const MOVE_COSTS = {
         'reef': 99,
         'beach': 99,
         'road': 1,
-        'river': 99
+        'river': 99,
+        'pipe': 99
     },
     'treads':{
         'grass': 1,
@@ -331,7 +445,8 @@ const MOVE_COSTS = {
         'reef': 99,
         'beach': 99,
         'road': 1,
-        'river': 99
+        'river': 99,
+        'pipe': 99
     },
     'lander':{
         'grass': 99,
@@ -341,7 +456,8 @@ const MOVE_COSTS = {
         'reef': 2,
         'beach': 1,
         'road': 99,
-        'river': 99
+        'river': 99,
+        'pipe': 99
     },
     'sea':{
         'grass': 99,
@@ -352,6 +468,7 @@ const MOVE_COSTS = {
         'beach': 99,
         'road': 99,
         'river': 99,
+        'pipe': 99
     },
     'air':{
         'grass': 1,
@@ -361,22 +478,29 @@ const MOVE_COSTS = {
         'reef': 1,
         'beach': 1,
         'road': 1,
-        'river': 1
+        'river': 1,
+        'pipe': 1
     }
 };
 
 const DAMAGE_MATRIX = {
     // Machine Gun (Infantry/Recon)
     'mgun': { 
-        'infantry': 0.55, 'light': 0.12, 'tank': 0.05, 'heavy': 0.01, 'copter': 0.07 
+        'infantry': 0.55, 'light': 0.12, 'tank': 0.05, 'heavy': 0.01, 'copter': 0.07, 'ship': 0,
+        'sub': 0 
+    },
+    'coptergun': { 
+        'infantry': 0.55, 'light': 0.12, 'tank': 0.05, 'heavy': 0.01, 'copter': 0.55, 'ship': 0,
+        'sub': 0 
     },
     // Bazooka (Mech units)
     'bazooka': { 
-        'infantry': 0.65, 'light': 0.85, 'tank': 0.55, 'heavy': 0.15, 'ship': 0.10 
+        'infantry': 0, 'light': 0.85, 'tank': 0.55, 'heavy': 0.15, 'ship': 0.10 
     },
     // Air-to-Ground Missiles (B-Copter)
     'agm': { 
-        'infantry': 0.75, 'light': 0.60, 'tank': 0.55, 'heavy': 0.25, 'ship': 0.25, 'sub': 0.25 
+        'infantry': 0,'light': 0.60, 'tank': 0.55, 'heavy': 0.25, 'ship': 0.25, 'sub': 0.25, 
+        'copter': 0
     },
     // Air-to-Air Missiles (Fighters)
     'aam': { 
@@ -388,11 +512,12 @@ const DAMAGE_MATRIX = {
     },
     // Standard Tank Cannon
     'cannon': { 
-        'infantry': 0.75, 'light': 0.75, 'tank': 0.55, 'heavy': 0.15, 'ship': 0.10 
+        'light': 0.75, 'tank': 0.55, 'heavy': 0.15, 'ship': 0.10, 'infantry': 0, 'copter': 0,
+        'sub': 0.10
     },
     // Heavy Tank Cannon
     'hvycannon': { 
-        'infantry': 1.0, 'light': 0.85, 'tank': 0.70, 'heavy': 0.45, 'ship': 0.10 
+        'light': 0.85, 'tank': 0.70, 'heavy': 0.45, 'ship': 0.10 
     },
     // Artillery Shells (Indirect)
     'artillery': { 
@@ -404,33 +529,53 @@ const DAMAGE_MATRIX = {
     },
     // Vulcan Cannon (Anti-Air)
     'vulcan': { 
-        'infantry': 1.0, 'light': 0.15, 'tank': 0.10, 'heavy': 0.05, 'copter': 1.20, 'plane': 0.65 
+        'infantry': 1.0, 'light': 0.15, 'tank': 0.10, 'heavy': 0.05, 'copter': 1.0, 'plane': 0.65 
     },
     // Battleship Big Guns
     'bb': { 
-        'infantry': 0.95, 'light': 0.90, 'tank': 0.90, 'heavy': 0.65, 'ship': 0.50, 'sub': 0.50 
+        'infantry': 1.0, 'light': 1.0, 'tank': 0.90, 'heavy': 0.65, 'ship': 0.50, 'sub': 0.50 
     },
     // Cruiser Anti-Sub / Depth Charges
     'antisub': { 
-        'sub': 0.90, 'copter': 1.15, 'plane': 0.65 
+        'sub': 0.90, 'copter': 0, 'plane': 0 
     },
     // Submarine Torpedoes
     'torps': { 
         'ship': 0.75, 'sub': 0.55 
+    },
+    'ciws': {
+        'sub': 0, 'copter': 1, 'plane': 0.65       
     }
 };
 
+const TEAM_COLORS = {
+    'red': 0xff0000,
+    'blue': 0x0000ff
+};
+
+const TERRAIN_DEFENSE = {
+    'grass': 1,
+    'forest': 2,
+    'mountain': 3,
+    'water': 0,
+    'reef': 1,
+    'beach': 0,
+    'road': 0,
+    'river': 0,
+    'pipe': 0
+};
+
 class Unit {
-    // Replaced 'color' with 'animKey'
     constructor(scene, gridX, gridY, unitStats) {
         this.scene = scene;
         this.gridX = gridX;
         this.gridY = gridY;
-
+        this.unitName = unitStats.unitName;
         this.team = unitStats.team;
         this.moveRange = unitStats.moveRange;
         this.movementType = unitStats.movementType;
         this.texture = unitStats.texture;
+        this.battle = unitStats.battle;
         this.maxHp = unitStats.maxHp || 10; // Defaults to 10 if you forget to put it in config
         this.hp = this.maxHp;               // Now this correctly equals 10!
         this.attackType = unitStats.attackType; 
@@ -441,14 +586,11 @@ class Unit {
         this.hasMoved = false;
         this.isDead = false;
 
-        // Copy all stats (minRange, maxRange, attackType, etc.) from the catalog
         Object.assign(this, unitStats); 
         
-        // Fallbacks in case the catalog is missing a range
         this.minRange = this.minRange || 1;
         this.maxRange = this.maxRange || 1;
 
-        // We use add.sprite instead of add.rectangle
         this.sprite = scene.add.sprite(
             gridX * TILE_SIZE + TILE_SIZE / 2, 
             gridY * TILE_SIZE + TILE_SIZE / 2, 
@@ -457,8 +599,6 @@ class Unit {
 
         this.sprite.play(this.texture);
 
-        // 2. Create the HP Text
-        // We set the depth to 3 so it's ALWAYS on top of the sprite (depth 2)
         this.hpText = scene.add.text(0, 0, '10', { 
             fontSize: '10px', 
             fontWeight: 'bold',
@@ -468,7 +608,6 @@ class Unit {
         });
         this.hpText.setDepth(3); 
 
-        // 3. Initial positioning
         this.syncVisuals();
     }
 
@@ -483,15 +622,12 @@ class Unit {
 
         this.sprite.setPosition(screenX, screenY);
 
-        // Position the HP text at the bottom-right of the tile
         this.hpText.setPosition(screenX + 2, screenY + 2);
         this.hpText.setText(Math.ceil(this.hp));
         
-        // Hide HP text if full health (optional, like Advance Wars)
         this.hpText.setVisible(this.hp < 10);
     }
 
-    // Update the text position when moving
     updateVisuals() {
         this.sprite.setPosition(this.gridX * TILE_SIZE + 8, this.gridY * TILE_SIZE + 8);
         this.hpText.setPosition(this.gridX * TILE_SIZE, this.gridY * TILE_SIZE + 8);
@@ -520,10 +656,9 @@ class Unit {
         if (this.hp <= 0) {
             this.hp = 0;
             this.die();
-            return; // <--- THIS IS THE MAGIC WORD. It stops the function right here!
+            return;
         }
         
-        // Only update visuals if the unit is still alive
         this.syncVisuals();
     }
 
@@ -536,10 +671,387 @@ class Unit {
 
 export class Start extends Phaser.Scene {
 
-    constructor() {
+    constructor() {;
         super('Start');
     }
 
+    getTerrainDefense(gridX, gridY, unit) {
+        if (unit.movementType === 'air') {
+            return 0;
+        }
+
+        const rawTileType = this.getTileTypeAt(gridX, gridY); 
+
+        const logicalTerrain = LOGICAL_TERRAIN[rawTileType] || 'grass';
+
+        return TERRAIN_DEFENSE[logicalTerrain] || 0;
+    }
+
+    getPath(startX, startY, endX, endY) {
+        // Standard BFS to find the shortest path through allowed tiles
+        const queue = [[{ x: startX, y: startY }]];
+        const visited = new Set();
+        visited.add(`${startX},${startY}`);
+
+        while (queue.length > 0) {
+            const path = queue.shift();
+            const { x, y } = path[path.length - 1];
+
+            // If we reached the cursor, return the array of coordinates
+            if (x === endX && y === endY) return path;
+
+            const neighbors = [
+                { x: x + 1, y: y }, { x: x - 1, y: y },
+                { x: x, y: y + 1 }, { x: x, y: y - 1 }
+            ];
+
+            for (const n of neighbors) {
+                const key = `${n.x},${n.y}`;
+                // Check if the tile is within the unit's highlighted movement range
+                const isMoveable = this.currentRangeTiles && this.currentRangeTiles.some(t => t.x === n.x && t.y === n.y);
+                
+                if (isMoveable && !visited.has(key)) {
+                    visited.add(key);
+                    queue.push([...path, n]);
+                }
+            }
+        }
+        return []; // Return empty if no path found
+    }
+
+    drawSpriteArrow(path) {
+        this.arrowGroup.clear(true, true);
+        if (!path || path.length < 2) return;
+
+        // We loop through every tile in the path
+        for (let i = 0; i < path.length; i++) {
+            // Skip the very first tile (where the unit stands)
+            if (i === 0) continue; 
+
+            const prev = path[i - 1];
+            const curr = path[i];
+            const next = path[i + 1]; // Might be undefined at the tip
+
+            const frameIndex = this.getArrowSegment(prev, curr, next);
+
+            const x = curr.x * TILE_SIZE + (TILE_SIZE / 2);
+            const y = curr.y * TILE_SIZE + (TILE_SIZE / 2);
+
+            const segment = this.add.sprite(x, y, 'arrow_tiles', frameIndex)
+                .setOrigin(0.5)
+                .setDepth(500);
+
+            this.arrowGroup.add(segment);
+        }
+    }
+
+    getArrowSegment(prev, curr, next) {
+        if (!next) {
+            if (curr.x > prev.x) return ARROW_FRAMES.ARROWRIGHT;
+            if (curr.x < prev.x) return ARROW_FRAMES.ARROWLEFT;
+            if (curr.y > prev.y) return ARROW_FRAMES.ARROWDOWN;
+            return ARROW_FRAMES.ARROWUP;
+        }
+
+        const inX = curr.x - prev.x;
+        const inY = curr.y - prev.y;
+        const outX = next.x - curr.x;
+        const outY = next.y - curr.y;
+
+        if (inX === outX && inY === outY) {
+            return (inX !== 0) ? ARROW_FRAMES.VERTICAL : ARROW_FRAMES.HORIZONTAL;
+        }
+
+        const combo = `${inX},${inY},${outX},${outY}`;
+
+        switch (combo) {
+            case '1,0,0,1':  case '0,-1,-1,0': return ARROW_FRAMES.DOWN_LEFT;
+            case '1,0,0,-1': case '0,1,-1,0':  return ARROW_FRAMES.UP_LEFT;
+            case '-1,0,0,1': case '0,-1,1,0':  return ARROW_FRAMES.DOWN_RIGHT;
+            case '-1,0,0,-1': case '0,1,1,0':  return ARROW_FRAMES.UP_RIGHT;
+            
+            default:
+                return (inX !== 0) ? ARROW_FRAMES.VERTICAL : ARROW_FRAMES.HORIZONTAL;
+        }
+    }
+
+    checkUIOverlap() {
+        const cam = this.cameras.main;
+        
+        const cursorX = (this.cursorX * TILE_SIZE) - cam.scrollX;
+        const cursorY = (this.cursorY * TILE_SIZE) - cam.scrollY;
+
+        const padding = 10;
+        const bottomY = cam.height - 40 - padding;
+        const statsBottomY = cam.height - 140 - padding;
+        const topY = padding;
+
+        const cursorInLeftUI = cursorX < 200 && cursorY > (cam.height - 100);
+        const leftTargetY = cursorInLeftUI ? topY : bottomY;
+        
+        this.moveUI(this.terrainBox, this.terrainText, padding, leftTargetY);
+        
+        const unitX = padding + 60 + 5; 
+        this.moveUI(this.unitBox, this.unitText, unitX, leftTargetY);
+
+        const statsWidth = 155;
+        const cursorInRightUI = cursorX > (cam.width - statsWidth - 50) && cursorY > (cam.height - 160);
+        const rightTargetY = cursorInRightUI ? topY : statsBottomY;
+        const rightX = cam.width - statsWidth - padding;
+
+        this.moveUI(this.statsBox, this.statsText, rightX, rightTargetY);
+    }
+
+    moveUI(box, text, targetX, targetY) {
+        if (!box) return;
+
+        if (box.x !== targetX || box.y !== targetY) {
+            this.tweens.killTweensOf([box, text]);
+
+            box.setPosition(targetX, targetY);
+            
+            text.setPosition(targetX + 8, targetY + 5); 
+        }
+    }
+
+    showUnitStats(unit) {
+        if (!this.statsBox || !this.statsText) return;
+
+        if (!unit) {
+            this.statsBox.setVisible(false);
+            this.statsText.setVisible(false);
+            return;
+        }
+
+        const strongList = unit.strongVs ? unit.strongVs.join(', ') : 'NONE';
+        const weakList = unit.weakVs ? unit.weakVs.join(', ') : 'NONE';
+
+        const nameLabel = (unit.unitName || "UNIT").toUpperCase();
+        const armorLabel = (unit.armorType || "NONE").toUpperCase();
+        const weapons = Array.isArray(unit.attackType) ? unit.attackType.join('/') : (unit.attackType || "NONE");
+        const hpLabel = Math.ceil(unit.hp || 0);
+
+        const info = [
+            `NAME:  ${nameLabel}`,
+            `HP:    ${hpLabel}/10`,
+            `---`,
+            `STRONG VS: 
+            ${strongList.toUpperCase()}`,
+            `WEAK VS:   
+            ${weakList.toUpperCase()}`
+        ].join('\n');
+
+        this.statsText.setText(info);
+
+        this.statsBox.setVisible(true).setDepth(3000);
+        this.statsText.setVisible(true).setDepth(3001);
+    }
+
+    getDistance(unitA, unitB) {
+        return Math.abs(unitA.gridX - unitB.gridX) + Math.abs(unitA.gridY - unitB.gridY);
+    }
+
+    getBestWeapon(attacker, target, distance) {
+        const weaponSource = attacker.weapons || attacker.attackType;
+        const weaponList = Array.isArray(weaponSource) ? weaponSource : [weaponSource];
+
+        let bestWeapon = null;
+        let maxDamage = -1;
+
+        // Use the unit's range (or define range per weapon in a separate lookup)
+        const minR = attacker.minRange || 1;
+        const maxR = attacker.maxRange || 1;
+
+        // RANGE CHECK: If the target is too close or too far, return null
+        if (distance < minR || distance > maxR) {
+            return null; 
+        }
+
+        weaponList.forEach(weapon => {
+            const multiplier = (DAMAGE_MATRIX[weapon] && DAMAGE_MATRIX[weapon][target.armorType]) ?? 0;
+            if (multiplier > maxDamage) {
+                maxDamage = multiplier;
+                bestWeapon = weapon;
+            }
+        });
+
+        return bestWeapon;
+    }
+
+    updateStatusBar() {
+        if (!this.terrainText || !this.unitText) return;
+
+        // 1. Update Terrain
+        const rawID = this.mapData[this.cursorY][this.cursorX];
+        let terrainDisplay = LOGICAL_TERRAIN[rawID] || rawID;
+        
+        if (terrainDisplay) {
+            terrainDisplay = terrainDisplay.charAt(0).toUpperCase() + terrainDisplay.slice(1);
+        }
+        this.terrainText.setText(`\n${terrainDisplay}`);
+
+        // 2. Update Unit
+        const unit = this.getUnitAt(this.cursorX, this.cursorY);
+        if (unit) {
+            this.unitBox.setVisible(true);
+            this.unitText.setVisible(true);
+            
+            const team = unit.team.toUpperCase();
+            const type = unit.unitName.toUpperCase();
+            this.unitText.setText(`${team} ${type}\nHP: ${unit.hp}/10`); 
+            // Note: Using \n for a two-line layout looks great in a small box!
+        } else {
+            this.unitBox.setVisible(false);
+            this.unitText.setVisible(false);
+        }
+    }
+
+    createUnitStatsBar() {
+        const cam = this.cameras.main;
+        const boxWidth = 155;
+        const boxHeight = 140;
+        const padding = 10;
+
+        const x = cam.width - boxWidth - padding;
+        const y = cam.height - boxHeight - padding;
+
+        this.statsText = this.add.text(x + 5, y + 5, '', {
+            fontSize: '10px',
+            fill: '#ffffff',
+            fontFamily: 'monospace',
+            lineSpacing: 4,
+
+            wordWrap: {
+                width: boxWidth - 5, // Wraps text 10px before the edge of the box
+                useAdvancedWrap: true // Handles punctuation and spaces better
+            }
+        })
+        .setScrollFactor(0)
+        .setDepth(101)
+        .setVisible(false);
+
+        this.statsBox = this.add.rectangle(x, y, boxWidth, boxHeight, 0x000000, 0.8)
+            .setOrigin(0, 0)
+            .setStrokeStyle(2, 0xffffff)
+            .setScrollFactor(0) 
+            .setDepth(100)
+            .setVisible(false);
+    }
+
+    createStatusBar() {
+        const gameHeight = this.sys.game.config.height;
+        const boxHeight = 40;
+        const padding = 10;
+        const gap = 5;
+
+        const terrainBoxWidth = 60;
+        this.terrainBox = this.add.rectangle(padding, gameHeight - boxHeight - padding, terrainBoxWidth, boxHeight, 0x000000, 0.8).setOrigin(0, 0);
+        this.terrainBox.setStrokeStyle(2, 0xffffff).setScrollFactor(0).setDepth(100);
+
+        this.terrainText = this.add.text(padding + 10, gameHeight - boxHeight - 1, 'Terrain: --', { 
+            fontSize: '10px', 
+            fill: '#ffffff', 
+            fontFamily: 'monospace' 
+        })
+        .setScrollFactor(0)
+        .setDepth(101);
+
+        const unitBoxWidth = 100;
+
+        const unitBoxX = padding + terrainBoxWidth + gap;
+        
+        this.unitBox = this.add.rectangle(unitBoxX, gameHeight - boxHeight - padding, unitBoxWidth, boxHeight, 0x000000, 0.8).setOrigin(0, 0);
+        this.unitBox.setStrokeStyle(2, 0xffffff).setScrollFactor(0).setDepth(100);
+
+        this.unitText = this.add.text(unitBoxX + 10, gameHeight - boxHeight - 2, '', { 
+            fontSize: '10px', 
+            fill: '#ffffff', 
+            fontFamily: 'monospace' 
+        })
+        .setScrollFactor(0)
+        .setDepth(101);
+
+        this.unitBox.setVisible(false);
+    }
+
+    updateCursorPosition() {
+        this.cursor.x = (this.cursorX * TILE_SIZE) + (TILE_SIZE / 2);
+        this.cursor.y = (this.cursorY * TILE_SIZE) + (TILE_SIZE / 2);
+
+        if (this.gameState === 'MOVING' && this.selectedUnit) {
+            const path = this.getPath(this.selectedUnit.gridX, this.selectedUnit.gridY, this.cursorX, this.cursorY);
+            
+            if (path.length > 1 && path.length <= this.selectedUnit.moveRange + 1) {
+                this.drawSpriteArrow(path);
+            } else {
+                this.arrowGroup.clear(true, true);
+            }
+        }
+    }
+
+    snapToUnit() {
+        const activeUnit = this.units.find(u => u.team === this.currentTurn && !u.hasMoved);
+
+        if (activeUnit) {
+            this.cursorX = activeUnit.gridX;
+            this.cursorY = activeUnit.gridY;
+
+            this.updateCursorPosition(); 
+            
+            console.log(`Snapped cursor to ${this.currentTurn} unit at ${this.cursorX}, ${this.cursorY}`);
+        }
+
+        this.updateStatusBar();
+    }
+
+    updateHoverRange() {
+        this.rangeGraphics.clear();
+
+        // Only show passive range when we are in IDLE state (just browsing the map)
+        if (this.gameState !== 'IDLE') return;
+
+        const hoveredUnit = this.getUnitAt(this.cursorX, this.cursorY);
+
+        if (hoveredUnit) {
+            // If you only want this for indirect units (Artillery/Rockets):
+            if (hoveredUnit.minRange > 1) {
+                const rangeTiles = this.getTilesInRange(
+                    hoveredUnit.gridX, 
+                    hoveredUnit.gridY, 
+                    hoveredUnit.minRange, 
+                    hoveredUnit.maxRange
+                );
+
+                this.rangeGraphics.fillStyle(0xff0000); // Red for attack range
+
+                rangeTiles.forEach(tile => {
+                    this.rangeGraphics.fillRect(
+                        tile.x * TILE_SIZE, 
+                        tile.y * TILE_SIZE, 
+                        TILE_SIZE, 
+                        TILE_SIZE
+                    );
+                });
+            }
+        }
+    }
+
+    getTilesInRange(centerX, centerY, minRange, maxRange) {
+        const tiles = [];
+        // We search a bounding box around the unit to save performance
+        for (let y = centerY - maxRange; y <= centerY + maxRange; y++) {
+            for (let x = centerX - maxRange; x <= centerX + maxRange; x++) {
+                const distance = Math.abs(x - centerX) + Math.abs(y - centerY);
+                if (distance >= minRange && distance <= maxRange) {
+                    // Ensure we stay within map boundaries
+                    if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
+                        tiles.push({ x, y });
+                    }
+                }
+            }
+        }
+        return tiles;
+    }
     // 1. Bridge the gap for your game logic
     showAttackIcons(targets) {
         // Store the targets so your highlightTargets function can use them
@@ -554,24 +1066,20 @@ export class Start extends Phaser.Scene {
         }
     }
     
-    getEnemyNeighbors(unit) {
-        // 1. If unit is null, return an empty array immediately
-        if (!unit) return [];
+    getEnemiesInRange(attacker) {
+        const minRange = attacker.minRange || 1;
+        const maxRange = attacker.maxRange || 1;
 
-        const targets = [];
-        const minRange = unit.minRange || 1;
-        const maxRange = unit.maxRange || 1;
-
-        this.units.forEach(other => {
-            if (other && !other.isDead && other.team !== unit.team) {
-                const dist = Math.abs(unit.gridX - other.gridX) + Math.abs(unit.gridY - other.gridY);
-                if (dist >= minRange && dist <= maxRange) {
-                    targets.push(other);
-                }
+        return this.units.filter(target => {
+            // Ignore dead units and units on your own team
+            if (target.isDead || target.team === attacker.team) {
+                return false;
             }
-        });
 
-        return targets;
+            const distance = Math.abs(attacker.gridX - target.gridX) + Math.abs(attacker.gridY - target.gridY);
+
+            return distance >= minRange && distance <= maxRange;
+        });
     }
 
     canUnitAttack(attacker, target) {
@@ -632,7 +1140,7 @@ export class Start extends Phaser.Scene {
     }
 
     updateDamagePreview() {
-        // If we aren't targeting or the unit is gone, hide the text and get out
+        // 1. Safety Checks
         if (this.gameState !== 'TARGETING' || !this.selectedUnit) {
             if (this.damagePreviewText) this.damagePreviewText.setVisible(false);
             return;
@@ -640,15 +1148,21 @@ export class Start extends Phaser.Scene {
 
         const target = this.getUnitAt(this.cursorX, this.cursorY);
 
-        // Only show if the cursor is actually on one of the enemies we can hit
+        // 2. Only show if cursor is on a valid target
         if (target && this.currentTargets && this.currentTargets.includes(target)) {
+            const weaponUsed = this.getBestWeapon(this.selectedUnit, target);
             const damage = this.calculateDamage(this.selectedUnit, target);
             const remainingHP = Math.max(0, target.hp - damage);
             
-            this.damagePreviewText.setText(`Target HP: ${target.hp} -> ${remainingHP}`);
+            // UI Polish: Show the weapon name and the HP change
+            // Example: "Coptergun: 10 -> 4"
+            const weaponName = weaponUsed.toUpperCase();
+            this.damagePreviewText.setText(`${weaponName}\nHP: ${target.hp} -> ${remainingHP}`);
+            
+            // Position text above the target
             this.damagePreviewText.setPosition(
                 this.cursorX * TILE_SIZE + TILE_SIZE / 2, 
-                this.cursorY * TILE_SIZE - 5
+                this.cursorY * TILE_SIZE - 20 // Moved up slightly more to fit two lines
             );
             this.damagePreviewText.setVisible(true);
         } else {
@@ -656,26 +1170,43 @@ export class Start extends Phaser.Scene {
         }
     }
 
-    calculateDamage(attacker, target) {
-        const attackerType = attacker.attackType;
-        const targetArmor = target.armorType;
+    calculateDamage(source, target, distance, basePower) {
+        // 1. DEFAULT VALUES: If distance or basePower are missing, fill them in
+        const dist = (distance !== undefined) ? distance : this.getDistance(source, target);
+        const atkPower = (basePower !== undefined) ? basePower : 10;
 
-        // 1. Check if the attack is possible
-        const multiplier = (DAMAGE_MATRIX[attackerType] && DAMAGE_MATRIX[attackerType][targetArmor]);
+        // 2. Get the best weapon for this specific distance
+        const weapon = this.getBestWeapon(source, target, dist);
+        if (!weapon) return null; 
+
+        // 3. Get the base multiplier (Safety check: || 0)
+        const targetArmor = target.armorType;
+        const multiplier = (DAMAGE_MATRIX[weapon] && DAMAGE_MATRIX[weapon][targetArmor]) || 0;
+
+        // 4. Calculate initial power
+        // If effectivePower returns NaN or doesn't exist, we fallback to a safe math operation
+        let damage = (source.getEffectivePower ? source.getEffectivePower(atkPower) : atkPower) * multiplier;
+
+        // 5. --- TERRAIN DEFENSE LOGIC ---
+        let defenseStars = 0;
         
-        // If it's undefined or 0, return 0 damage immediately
-        if (!multiplier || multiplier <= 0) {
-            return 0; 
+        if (target.movementType !== 'air') {
+            const row = this.mapData[target.gridY];
+            const rawID = row ? row[target.gridX] : null;
+            
+            // Ensure we actually found a tile ID
+            if (rawID !== null) {
+                const logicalType = LOGICAL_TERRAIN[rawID];
+                defenseStars = (logicalType && TERRAIN_DEFENSE[logicalType]) || 0;
+            }
         }
 
-        const baseAtk = 12; 
-        const healthFactor = attacker.hp / 10;
-        let damage = Math.round(baseAtk * multiplier * healthFactor);
+        // Apply the 10% reduction per star
+        const defenseMultiplier = Math.max(0.1, 1.0 - (defenseStars * 0.1));
+        damage = damage * defenseMultiplier;
 
-        // Scratch damage only applies if the unit CAN actually hit the target
-        if (damage < 1) damage = 1;
-
-        return damage;
+        // 6. FINAL GUARD: If something still went wrong, return 0 instead of NaN
+        return isNaN(damage) ? 0 : Math.max(0, Math.round(damage));
     }
 
     highlightTargets() {
@@ -689,56 +1220,43 @@ export class Start extends Phaser.Scene {
     }
 
     executeAttack(attacker, target) {
-        const predictedDmg = this.calculateDamage(attacker, target);
-    
-        // If we can't do any damage, stop the function immediately
-        if (predictedDmg <= 0) {
-            console.log(`${attacker.attackType} cannot harm ${target.armorType}. Attack cancelled.`);
+        console.log("--- ATTACK STARTED ---");
+
+        // 1. Calculate distance
+        const dist = this.getDistance(attacker, target);
+
+        // 2. Predict Damage (Note: Check if your calculateDamage uses unitName or textureBase)
+        let damageToTarget = this.calculateDamage(attacker, target, dist, 10);
+
+        // 3. Predict Counter
+        let damageToAttacker = 0;
+        if (damageToTarget !== null && (target.hp - damageToTarget > 0)) {
+            damageToAttacker = this.calculateDamage(target, attacker, dist, 3) || 0; 
+        }
+
+        // 4. VALIDATION
+        if (damageToTarget === null) {
+            console.warn("ATTACK CANCELLED: Distance or weapon invalid.");
             return; 
         }
 
-        // 1. Get the raw multiplier
-        const attackerType = attacker.attackType;
-        const targetArmor = target.armorType;
-        
-        // Safety check for the matrix
-        let multiplier = 0.1; // Default to very low damage if lookup fails
-        if (DAMAGE_MATRIX[attackerType] && DAMAGE_MATRIX[attackerType][targetArmor] !== undefined) {
-            multiplier = DAMAGE_MATRIX[attackerType][targetArmor];
-        } else {
-            console.error(`MISSING MATRIX: No damage for ${attackerType} vs ${targetArmor}`);
-        }
+        // SAFE LOG: No more .type!
+        console.log(`BATTLE: ${attacker.unitName} vs ${target.unitName} at dist ${dist}`);
 
-        const baseAtk = 10; 
-        let damage = Math.round(attacker.getEffectivePower(baseAtk) * multiplier);
-        
-        // CRITICAL: Ensure damage is at least 0 and never more than target HP unless intended
-        damage = Math.max(0, damage);
+        const targetTileID = this.mapData[target.gridY][target.gridX];
+        const terrainKey = LOGICAL_TERRAIN[targetTileID] || 'grass';
 
-        console.log(`BATTLE: ${attacker.team} ${attackerType} hits ${target.team} ${targetArmor}`);
-        console.log(`Mult: ${multiplier}, Final Dmg: ${damage}, Target HP before: ${target.hp}`);
+        // 5. LAUNCH
+        this.scene.pause(); 
+        this.scene.launch('BattleScene', {
+            attacker: attacker,
+            defender: target,
+            damageToDefender: damageToTarget,
+            damageToAttacker: damageToAttacker,
+            terrainInfo: { name: terrainKey }
+        });
 
-        // Apply damage ONLY ONCE
-        target.hp -= damage;
-        if (target.takeDamage) target.takeDamage(damage); // Use for visual effects only
-
-        // ... Counter attack logic (Same cleanup) ...
-        if (target.hp > 0) {
-            const counterMultiplier = (DAMAGE_MATRIX[target.attackType] && DAMAGE_MATRIX[target.attackType][attacker.armorType]) || 1.0;
-            const baseRet = 3; 
-            let counterDamage = Math.round(target.getEffectivePower(baseRet) * counterMultiplier);
-            
-            console.log(`Counter: ${counterDamage} dmg`);
-            attacker.hp -= counterDamage;
-            attacker.takeDamage(counterDamage);
-        }
-
-        // 3. Final Cleanup: Check if anyone died
-        this.cleanupDeadUnit(target);
-        this.cleanupDeadUnit(attacker);
-
-        // 4. Check for Game Over
-        this.checkVictory();
+        console.log("--- SCENE LAUNCHED ---");
     }
 
     cleanupDeadUnit(unit) {
@@ -750,6 +1268,7 @@ export class Start extends Phaser.Scene {
             this.units = this.units.filter(u => u !== unit);
             
             console.log(`${unit.team} ${unit.attackType} was destroyed!`);
+            this.hpText.clear();
         }
     }
 
@@ -761,6 +1280,7 @@ export class Start extends Phaser.Scene {
         if (this.highlightGraphics) this.highlightGraphics.clear();
         if (this.targetGraphics) this.targetGraphics.clear();
         
+        
         // 3. Reset logic variables
         this.selectedUnit = null;
         this.currentRangeTiles = null;
@@ -770,6 +1290,7 @@ export class Start extends Phaser.Scene {
         this.gameState = 'IDLE';
         
         console.log("Turn finished. Game state is now IDLE.");
+        this.showUnitStats(null);
     }
 
     update() {
@@ -782,8 +1303,6 @@ export class Start extends Phaser.Scene {
         }
         
         if (this.currentRangeTiles) {
-            // Use the pulsing alpha from our tween
-            // Inside update(), before filling the rectangles
             this.highlightGraphics.setBlendMode(Phaser.BlendModes.ADD); 
             this.highlightGraphics.fillStyle(0x0055ff, this.highlightAlpha);
             this.highlightGraphics.fillStyle(0x33ccff, this.highlightAlpha); 
@@ -803,9 +1322,16 @@ export class Start extends Phaser.Scene {
     }
 
     preload() {
-        // Terrain tile spritesheet
+        this.load.spritesheet('battle', 'assets/battle-sprites.png', {
+            frameWidth: 128, 
+            frameHeight: 128
+        });
         this.load.image('terrain_tiles', 'assets/spritesheet.png');
         this.load.image('structure_tiles', 'assets/spritesheet1.png');
+        this.load.spritesheet('arrow_tiles', 'assets/arrows.png', {
+            frameWidth: 16,
+            frameHeight: 16
+        });
 
         // Unit spritesheet
         this.load.spritesheet('units', 'assets/unit-sprites.png', { 
@@ -813,7 +1339,9 @@ export class Start extends Phaser.Scene {
             frameHeight: 16 
         });
 
-        this.load.tilemapTiledJSON('map', 'assets/pdsmallmap1.json');
+        //this.load.tilemapTiledJSON('map', 'assets/pdsmallmap1.json');
+        this.load.tilemapTiledJSON('map', 'assets/pdbigmap.json');
+
     }
 
     create() {
@@ -829,7 +1357,40 @@ export class Start extends Phaser.Scene {
             (MAP_HEIGHT * TILE_SIZE) / 2
         );
 
-        
+        // Inside Start.js create()
+        this.events.on('battleFinished', (results) => {
+            const { attacker, defender, attackerDamageTaken, defenderDamageTaken } = results;
+
+            // 1. Apply the numerical damage
+            if (attacker) attacker.hp -= attackerDamageTaken;
+            if (defender) defender.hp -= defenderDamageTaken;
+
+            // 2. TRIGGER THE VISUALS (The Fix)
+            // This calls the function you just showed me
+            if (attacker && attacker.hp > 0) {
+                attacker.syncVisuals(); 
+            }
+            if (defender && defender.hp > 0) {
+                defender.syncVisuals();
+            }
+
+            // 3. Cleanup logic
+            this.cleanupDeadUnit(attacker);
+            this.cleanupDeadUnit(defender);
+            this.units = this.units.filter(u => u.hp > 0);
+
+            if (this.targetGraphics) this.targetGraphics.clear();
+
+            // 4. Reset state
+            if (attacker && attacker.hp > 0) {
+                attacker.finishAction(); 
+            }
+            this.gameState = 'IDLE';
+            this.selectedUnit = null;
+            this.currentTargets = [];
+        });
+
+        this.arrowGroup = this.add.group();
 
         this.damagePreviewText = this.add.text(0, 0, '', {
             fontSize: '12px',
@@ -851,11 +1412,23 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_infantry_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 0, end: 0 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_infantry_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 3, end: 5 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'blue_infantry_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 1, end: 1 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'red_mech_idle',
@@ -865,6 +1438,12 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_mech_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 2, end: 2 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_mech_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 9, end: 11 }),
             frameRate: 5, // 4 frames per second
@@ -872,11 +1451,22 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'blue_mech_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 3, end: 3 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'red_recon_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 12, end: 14 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });this.anims.create({
+            key: 'red_recon_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 12, end: 12 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'blue_recon_idle',
@@ -886,11 +1476,23 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'blue_recon_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 13, end: 13 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'red_tank_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 18, end: 20 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'red_tank_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 4, end: 4 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'blue_tank_idle',
@@ -900,11 +1502,23 @@ export class Start extends Phaser.Scene {
             yoyo: true
         });
         this.anims.create({
+            key: 'blue_tank_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 5, end: 5 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'red_heavy_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 24, end: 26 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'red_heavy_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 4, end: 4 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'blue_heavy_idle',
@@ -914,11 +1528,23 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'blue_heavy_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 5, end: 5 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'red_apc_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 30, end: 32 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'red_apc_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 8, end: 8 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'blue_apc_idle',
@@ -928,11 +1554,22 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'blue_apc_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 9, end: 9 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'red_aa_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 36, end: 38 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });this.anims.create({
+            key: 'red_aa_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 10, end: 10 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'blue_aa_idle',
@@ -940,12 +1577,25 @@ export class Start extends Phaser.Scene {
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
-        });this.anims.create({
+        });
+        this.anims.create({
+            key: 'blue_aa_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 11, end: 11 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'red_arty_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 42, end: 44 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'red_arty_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 14, end: 14 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'blue_arty_idle',
@@ -955,11 +1605,23 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'blue_arty_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 15, end: 15 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'red_rocket_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 48, end: 50 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'red_rocket_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 14, end: 14 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'blue_rocket_idle',
@@ -969,11 +1631,23 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'blue_rocket_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 15, end: 15 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'red_missile_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 54, end: 56 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'red_missile_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 16, end: 16 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'blue_missile_idle',
@@ -983,6 +1657,12 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'blue_missile_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 17, end: 17 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'red_fighter_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 60, end: 62 }),
             frameRate: 5, // 4 frames per second
@@ -990,11 +1670,22 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_fighter_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 18, end: 18 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_fighter_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 63, end: 65 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });this.anims.create({
+            key: 'blue_fighter_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 19, end: 19 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'red_bomber_idle',
@@ -1004,11 +1695,23 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_bomber_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 20, end: 20 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_bomber_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 69, end: 71 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'blue_bomber_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 21, end: 21 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'red_helicopter_idle',
@@ -1018,11 +1721,23 @@ export class Start extends Phaser.Scene {
             yoyo: false    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_helicopter_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 22, end: 22 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_helicopter_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 75, end: 77 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: false    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'blue_helicopter_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 23, end: 23 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'red_transport_idle',
@@ -1032,11 +1747,23 @@ export class Start extends Phaser.Scene {
             yoyo: false    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_transport_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 24, end: 24 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_transport_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 81, end: 83 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: false    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'blue_transport_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 25, end: 25 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'red_bb_idle',
@@ -1046,11 +1773,23 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_bb_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 28, end: 28 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_bb_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 87, end: 89 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'blue_bb_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 29, end: 29 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'red_ca_idle',
@@ -1060,11 +1799,23 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_ca_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 26, end: 26 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_ca_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 93, end: 95 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'blue_ca_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 27, end: 27 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'red_lander_idle',
@@ -1074,11 +1825,23 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_lander_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 30, end: 30 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_lander_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 99, end: 101 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
+        });
+        this.anims.create({
+            key: 'blue_lander_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 31, end: 31 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
         });
         this.anims.create({
             key: 'red_sub_idle',
@@ -1088,14 +1851,25 @@ export class Start extends Phaser.Scene {
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
         this.anims.create({
+            key: 'red_sub_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 32, end: 32 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
+        this.anims.create({
             key: 'blue_sub_idle',
             frames: this.anims.generateFrameNumbers('units', { start: 105, end: 107 }),
             frameRate: 5, // 4 frames per second
             repeat: -1,   // -1 means loop forever
             yoyo: true    // Plays 0-1-2-3-2-1-0 (makes the bobbing look smoother)
         });
+        this.anims.create({
+            key: 'blue_sub_battle',
+            frames: this.anims.generateFrameNumbers('battle', { start: 33, end: 33 }),
+            frameRate: 5, // 4 frames per second
+            repeat: 0,   // -1 means loop forever
+        });
 
-        // Inside create()
         this.highlightAlpha = 0.3; // Default starting alpha
         this.tweens.add({
             targets: this,
@@ -1105,7 +1879,7 @@ export class Start extends Phaser.Scene {
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
-
+        this.createUnitStatsBar();
         
         const map = this.make.tilemap({ key: 'map' });
 
@@ -1137,8 +1911,19 @@ export class Start extends Phaser.Scene {
             }
             this.mapData.push(row);
         }
+        // Create the cursor
+        
+        this.cursor = this.add.rectangle(
+            TILE_SIZE / 2, TILE_SIZE / 2, 
+            TILE_SIZE, TILE_SIZE
+        );
+        this.cursor.setOrigin(0.5);
+        this.cursor.setStrokeStyle(4, 0xff0000); 
+        this.cursor.setDepth(3);
 
-        // DEBUG: This will show you exactly what your map looks like to the computer
+        this.rangeGraphics = this.add.graphics();
+        this.rangeGraphics.setAlpha(0.4);
+
         console.log("Map Data Sample (First Row):", this.mapData[0]);
         console.table(this.mapData);
         this.terrainLayer.setDepth(0);
@@ -1169,16 +1954,7 @@ export class Start extends Phaser.Scene {
         this.actionMenu = this.add.container(0, 0).setVisible(false);
         this.actionMenu.setDepth(10); // Keep it above the units and highlights!
 
-        // Create the cursor
         
-        this.cursor = this.add.rectangle(
-            TILE_SIZE / 2, TILE_SIZE / 2, 
-            TILE_SIZE, TILE_SIZE
-        );
-        this.cursor.setStrokeStyle(4, 0xffff00); 
-        this.cursor.setDepth(3);
-
-        // Setup Inputs
         this.cursors = this.input.keyboard.createCursorKeys();
         // Inside create()
         this.zKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
@@ -1212,6 +1988,11 @@ export class Start extends Phaser.Scene {
         this.turnBanner.setVisible(false);
         this.currentTurn = 'red';
         this.gameState = 'IDLE';
+
+
+        this.createStatusBar();
+
+        this.snapToUnit();
     }
 
     showActionMenu(x, y, options) {
@@ -1219,7 +2000,7 @@ export class Start extends Phaser.Scene {
         this.menuOptions = options;
         this.menuIndex = 0;
 
-        const menuWidth = 90;
+        const menuWidth = 100;
         const menuHeight = options.length * 20 + 10;
         const mapPixelWidth = MAP_WIDTH * TILE_SIZE;
         const mapPixelHeight = MAP_HEIGHT * TILE_SIZE;
@@ -1282,12 +2063,51 @@ export class Start extends Phaser.Scene {
             else if (event.code === 'ArrowLeft' && this.cursorX > 0) this.cursorX--;
             else if (event.code === 'ArrowRight' && this.cursorX < MAP_WIDTH - 1) this.cursorX++;
 
+            if (Phaser.Input.Keyboard.JustDown
+            (this.cursors.right) || 
+            (this.cursors.left) || 
+            (this.cursors.up) || 
+            (this.cursors.down)) {
+                this.updateCursorPosition();
+                this.updateStatusBar(); // <--- ADD THIS HERE
+                this.checkUIOverlap();
+            }
             this.cursor.setPosition(
                 this.cursorX * TILE_SIZE + TILE_SIZE / 2, 
                 this.cursorY * TILE_SIZE + TILE_SIZE / 2
             );
-
             this.updateDamagePreview();
+
+            // Inside your update loop or cursor move function:
+            this.rangeGraphics.clear();
+
+            // Only show passive range when we are in IDLE state (just browsing the map)
+            if (this.gameState !== 'IDLE') return;
+
+            const hoveredUnit = this.getUnitAt(this.cursorX, this.cursorY);
+
+            if (hoveredUnit) {
+                // If you only want this for indirect units (Artillery/Rockets):
+                if (hoveredUnit.minRange > 1) {
+                    const rangeTiles = this.getTilesInRange(
+                        hoveredUnit.gridX, 
+                        hoveredUnit.gridY, 
+                        hoveredUnit.minRange, 
+                        hoveredUnit.maxRange
+                    );
+
+                    this.rangeGraphics.fillStyle(0xff0000); // Red for attack range
+
+                    rangeTiles.forEach(tile => {
+                        this.rangeGraphics.fillRect(
+                            tile.x * TILE_SIZE, 
+                            tile.y * TILE_SIZE, 
+                            TILE_SIZE, 
+                            TILE_SIZE
+                        );
+                    });
+                }
+            }
         }
         else if (this.gameState === 'MENU' || this.gameState === 'MAP_MENU') {
             if (event.code === 'ArrowUp') {
@@ -1301,33 +2121,12 @@ export class Start extends Phaser.Scene {
         }
     }
     handleSelect() {
-        // Step A: Find all units in range
-        // 1. Get ALL units in range (1 for direct, 2-3 for artillery, etc.)
-        const potentialTargets = this.getEnemyNeighbors(this.selectedUnit);
-
-        const validTargets = potentialTargets.filter(enemy => {
-            const atkType = this.selectedUnit.attackType;
-            const defArmor = enemy.armorType;
-            
-            // If the attacker type doesn't even exist in the matrix, allow the attack
-            // but warn us in the console.
-            if (!DAMAGE_MATRIX[atkType]) {
-                console.warn(`Attack Type "${atkType}" not found in Matrix!`);
-                return true; 
-            }
-
-            const multiplier = DAMAGE_MATRIX[atkType][defArmor];
-
-            // Only block if the multiplier is EXPLICITLY 0
-            return multiplier !== 0;
-        });
-
-
         if (this.gameState === 'IDLE') {
             const unit = this.getUnitAt(this.cursorX, this.cursorY);
 
             console.log(`Checking tile ${this.cursorX},${this.cursorY}. Unit found:`, unit);
-
+            
+            
             if (unit) {
                 console.log(`Unit Team: ${unit.team}, Current Turn: ${this.currentTurn}, Has Moved: ${unit.hasMoved}`);
             }
@@ -1353,6 +2152,7 @@ export class Start extends Phaser.Scene {
                     
                     this.highlightMovementRange(this.currentRangeTiles);
                     this.gameState = 'MOVING';
+                    this.showUnitStats(this.selectedUnit);
                 }
             } else {
                 // CLICKED EMPTY TILE: Show Map Menu to End Turn
@@ -1361,27 +2161,53 @@ export class Start extends Phaser.Scene {
             }
         }
         else if (this.gameState === 'MOVING') {
-            const isReachable = this.currentRangeTiles.some(t => t.x === this.cursorX && t.y === this.cursorY);
-            const isStayingPut = (this.cursorX === this.selectedUnit.gridX && this.cursorY === this.selectedUnit.gridY);
+            this.showUnitStats(null);
+            // 1. Get the path for the arrow
+            const path = this.getPath(this.selectedUnit.gridX, this.selectedUnit.gridY, this.cursorX, this.cursorY);
+            
+            // 2. Determine if the move is valid
+            const isReachable = this.currentRangeTiles && this.currentRangeTiles.some(t => t.x === this.cursorX && t.y === this.cursorY);
             const unitAtCursor = this.getUnitAt(this.cursorX, this.cursorY);
+            const isStayingPut = (this.cursorX === this.originalX && this.cursorY === this.originalY);
 
             if ((isReachable && !unitAtCursor) || isStayingPut) {
+                // Clear the arrow sprites before the unit moves
+                if (this.arrowGroup) this.arrowGroup.clear(true, true);
+                
+                // Move unit
                 this.selectedUnit.gridX = this.cursorX;
                 this.selectedUnit.gridY = this.cursorY;
                 this.selectedUnit.syncVisuals();
 
-                if (this.highlightGraphics) {
-                    this.highlightGraphics.clear();
-                }
-                
-                // --- ADD THIS LINE ---
-                // This removes the "map" the game uses to draw the blue tiles
+                if (this.highlightGraphics) this.highlightGraphics.clear();
                 this.currentRangeTiles = null; 
 
-                const enemies = this.getAdjacentEnemies(this.selectedUnit.gridX, this.selectedUnit.gridY, this.selectedUnit.team);
+                // ... rest of your Action Menu logic ...
                 let options = ['Wait'];
-                if (enemies.length > 0) options.unshift('Attack');
 
+                // 1. Identify if this is an indirect fire unit (Range > 1)
+                const isIndirect = (this.selectedUnit.minRange > 1);
+
+                // 2. Rule: Indirect units can ONLY attack if they didn't move.
+                // Direct units (minRange 1) can move and attack normally.
+                const canAttackThisTurn = !isIndirect || isStayingPut;
+
+                if (canAttackThisTurn) {
+                    const potentialTargets = this.getEnemiesInRange(this.selectedUnit);
+                    const validTargets = potentialTargets.filter(enemy => {
+                        const atkType = this.selectedUnit.attackType;
+                        const defArmor = enemy.armorType;
+                        
+                        return this.selectedUnit.attackType.some(weapon => {
+                            const mult = DAMAGE_MATRIX[weapon] && DAMAGE_MATRIX[weapon][defArmor];
+                            return mult !== undefined && mult > 0;
+                        });
+                    });
+
+                    if (validTargets.length > 0) {
+                        options.unshift('Attack');
+                    }
+                }
                 this.showActionMenu(this.selectedUnit.gridX, this.selectedUnit.gridY, options);
             }
         }
@@ -1395,46 +2221,55 @@ export class Start extends Phaser.Scene {
             } 
             // Inside handleSelect when 'Attack' is chosen:
             else if (choice === 'Attack') {
-                this.currentTargets = this.getAdjacentEnemies(this.selectedUnit.gridX, this.selectedUnit.gridY, this.selectedUnit.team);
-                this.actionMenu.setVisible(false);
-                this.highlightTargets();
+                // Get all enemies within the strict min/max range boundaries
+                const potentialTargets = this.getEnemiesInRange(this.selectedUnit);
                 
-                // SNAP cursor to the first available target so the player doesn't have to hunt for it
+                // Inside your choice === 'Attack' block:
+                this.currentTargets = potentialTargets.filter(enemy => {
+                    const defArmor = enemy.armorType;
+                    
+                    // CRITICAL: You must RETURN the result of the .some() call back to the filter!
+                    return this.selectedUnit.attackType.some(weapon => {
+                        const weaponData = DAMAGE_MATRIX[weapon];
+                        const mult = weaponData ? weaponData[defArmor] : 0;
+                        
+                        const isValid = (mult !== undefined && mult > 0);
+                        console.log(`Checking ${weapon} vs ${defArmor}: Multiplier is ${mult}`);
+                        
+                        return isValid; // This returns to the .some()
+                    }); // This returns to the .filter()
+                });
+
                 if (this.currentTargets.length > 0) {
+                    this.actionMenu.setVisible(false);
+                    this.highlightTargets(); // Your red boxes will now draw correctly!
+                    
+                    // Snap cursor to first valid target
                     this.cursorX = this.currentTargets[0].gridX;
                     this.cursorY = this.currentTargets[0].gridY;
-                    this.cursor.setPosition(
-                        this.cursorX * TILE_SIZE + TILE_SIZE / 2, 
-                        this.cursorY * TILE_SIZE + TILE_SIZE / 2
-                    );
+                    
+                    this.gameState = 'TARGETING';
+                } else {
+                    console.log("No damageable targets in range.");
                 }
-
-                this.gameState = 'TARGETING';
             }
         }
         else if (this.gameState === 'TARGETING') {
             const targetUnit = this.getUnitAt(this.cursorX, this.cursorY);
             
-            // Check if we actually clicked a valid enemy from our list
             if (targetUnit && this.currentTargets.includes(targetUnit)) {
-                
-                // 1. Run the combat
+                // 1. JUST start the attack. Do NOT filter units or finish turns here.
                 this.executeAttack(this.selectedUnit, targetUnit);
                 
-                // 2. Clean up the units array (remove anyone who died)
-                this.units = this.units.filter(u => !u.isDead);
-
-                // 3. IMPORTANT: Finalize the attacker's turn
-                // If the attacker survived the counter-attack, mark them as done
-                if (!this.selectedUnit.isDead) {
-                    this.selectedUnit.finishAction();
-                }
-
-                // 4. Reset the game state to IDLE
-                this.finishTurn();
+                // 2. Hide the UI immediately
+                if (this.attackGraphics) this.attackGraphics.clear();
+                if (this.damagePreviewText) this.damagePreviewText.setVisible(false);
+            } else {
+                // If they click empty ground, cancel targeting
+                this.gameState = 'IDLE';
+                if (this.attackGraphics) this.attackGraphics.clear();
             }
         }
-        // Add this to your handleSelect if you haven't yet!
         else if (this.gameState === 'MAP_MENU') {
             const choice = this.menuOptions[this.menuIndex];
             if (choice === 'End Turn') {
@@ -1471,6 +2306,7 @@ export class Start extends Phaser.Scene {
 
         // ... your existing cancel logic for MOVING, MENU, and TARGETING ...
         if (this.gameState === 'MOVING') {
+            this.arrowGroup.clear(true, true);
             this.finishTurn();
         } 
         else if (this.gameState === 'MENU' || this.gameState === 'TARGETING') {
@@ -1588,6 +2424,9 @@ export class Start extends Phaser.Scene {
     nextTurn() {
         // 1. Swap the active team
         this.currentTurn = (this.currentTurn === 'red') ? 'blue' : 'red';
+
+        const teamColor = TEAM_COLORS[this.currentTurn];
+        this.cursor.setStrokeStyle(4, teamColor);
         
         // 2. Process ALL units
         this.units.forEach(u => {
@@ -1601,6 +2440,7 @@ export class Start extends Phaser.Scene {
                 // Keep the other team's hasMoved as true so you can't click them
                 u.hasMoved = true; 
             }
+            this.snapToUnit();
         });
 
         this.finishTurn(); 
@@ -1644,18 +2484,14 @@ export class Start extends Phaser.Scene {
     }
 
     highlightMovementRange(tiles) {
-        // 1. Create the graphics object if it doesn't exist yet
         if (!this.highlightGraphics) {
             this.highlightGraphics = this.add.graphics().setDepth(1);
         }
         
-        // 2. Clear anything drawn previously
         this.highlightGraphics.clear();
         
-        // 3. If we don't have any tiles to draw, just stop
         if (!tiles) return;
 
-        // 4. Draw a semi-transparent blue square for every reachable tile
         this.highlightGraphics.fillStyle(0x0000ff, 0.3); // 0.3 is the transparency (alpha)
         tiles.forEach(tile => {
             this.highlightGraphics.fillRect(
